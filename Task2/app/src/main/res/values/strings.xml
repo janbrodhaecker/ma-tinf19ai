@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Task2</string>
+    <string name="et_label">Enter your name</string>
+    <string name="btn_label">Say Hi!</string>
+    <string name="label_hello">Hi %1$s!</string>
+</resources>
