@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.dhbw.tinf19ai.task2.databinding.ActivityMainBinding;
 
@@ -24,9 +26,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // add onClick listener to button
         this.binding.btnSayHi.setOnClickListener(this);
-
-        // as long there is no text, hide input label
-        this.binding.tvName.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -45,5 +44,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // set text label visible
             this.binding.tvName.setVisibility(View.VISIBLE);
         }
+
+
+
+        // as long there is no text, hide input label
+        this.binding.tvName.setVisibility(View.INVISIBLE);
     }
 }
