@@ -1,9 +1,14 @@
 package com.dhbw.tinf19ai.task5;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -14,13 +19,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.location.GeocoderNominatim;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.OverlayItem;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class OSMFragment extends Fragment {
 
@@ -29,7 +39,6 @@ public class OSMFragment extends Fragment {
 
     private MapView mapView;
     private IMapController mapController;
-
 
     public OSMFragment() {
         // Required empty public constructor
@@ -57,10 +66,15 @@ public class OSMFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_osm, container, false);
         this.mapView = (MapView) view.findViewById(R.id.map_view);
         this.mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE);
-
         this.mapController = this.mapView.getController();
-        this.mapController.setCenter(MANNHEIM_GEO_POINT);
         this.mapController.setZoom(15.0);
+
+        setMarkerAndCenter(MANNHEIM_GEO_POINT);
+
+        if (getArguments() != null) {
+            String location = getArguments().getString("result");
+            searchAndCenterAddress(location);
+        }
         return view;
     }
 
@@ -78,6 +92,27 @@ public class OSMFragment extends Fragment {
         }
     }
 
+    public void searchAndCenterAddress(final String input) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    GeocoderNominatim geocoderNominatim = new GeocoderNominatim("default-user-agent");
+                    Address address = geocoderNominatim.getFromLocationName(input, 10).get(0);
+                    final GeoPoint geoPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setMarkerAndCenter(geoPoint);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     private void requestPermissionsIfNecessary(String[] permissions) {
         ArrayList<String> permissionsToRequest = new ArrayList<>();
         for (String permission : permissions) {
@@ -93,6 +128,15 @@ public class OSMFragment extends Fragment {
                     permissionsToRequest.toArray(new String[0]),
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
+    }
+
+    private void setMarkerAndCenter(GeoPoint geoPoint) {
+        Marker startMarker = new Marker(mapView);
+        startMarker.setPosition(geoPoint);
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        mapView.getOverlays().add(startMarker);
+
+        this.mapController.setCenter(geoPoint);
     }
 
 }
