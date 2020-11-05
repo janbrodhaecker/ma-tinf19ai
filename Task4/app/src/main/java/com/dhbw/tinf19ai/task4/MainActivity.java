@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // use async method, to not block the UI thread
-/*        this.okHttpClient.newCall(request).enqueue(new Callback() {
+        this.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Log.e(TAG, "Could not fetch data! Message: " + e);
@@ -52,14 +52,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Response: " + textInfo);
                 }
             }
-        }); */
-
-        try {
-            Response response = this.okHttpClient.newCall(request).execute();
-        } catch (IOException e) {
-            Log.e(TAG, e.toString());
-        }
-
+        });
     }
 
     private List<String> getTextInformation(String rawResponse) {

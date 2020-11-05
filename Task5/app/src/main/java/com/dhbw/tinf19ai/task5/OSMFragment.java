@@ -1,11 +1,13 @@
 package com.dhbw.tinf19ai.task5;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,9 +16,14 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.bonuspack.location.GeocoderNominatim;
@@ -34,11 +41,14 @@ import java.util.List;
 
 public class OSMFragment extends Fragment {
 
+    private static final String TAG = "OSMFragment";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final GeoPoint MANNHEIM_GEO_POINT = new GeoPoint(49.48406198, 8.47564897);
 
     private MapView mapView;
     private IMapController mapController;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private GeoPoint selectedLocation;
 
     public OSMFragment() {
         // Required empty public constructor
@@ -56,7 +66,9 @@ public class OSMFragment extends Fragment {
         Configuration.getInstance().setUserAgentValue(getActivity().getPackageName());
         requestPermissionsIfNecessary(new String[] {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
         });
     }
 
@@ -69,12 +81,15 @@ public class OSMFragment extends Fragment {
         this.mapController = this.mapView.getController();
         this.mapController.setZoom(15.0);
 
+        this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+
         setMarkerAndCenter(MANNHEIM_GEO_POINT);
 
         if (getArguments() != null) {
             String location = getArguments().getString("result");
             searchAndCenterAddress(location);
         }
+        getLatKnownLocation();
         return view;
     }
 
@@ -97,13 +112,15 @@ public class OSMFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    GeocoderNominatim geocoderNominatim = new GeocoderNominatim("default-user-agent");
-                    Address address = geocoderNominatim.getFromLocationName(input, 10).get(0);
+                    final GeocoderNominatim geocoderNominatim = new GeocoderNominatim("default-user-agent");
+                    List<Address> addresses = geocoderNominatim.getFromLocationName(input, 10);
+                    Address address = addresses.get(0);
                     final GeoPoint geoPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             setMarkerAndCenter(geoPoint);
+                            selectedLocation = geoPoint;
                         }
                     });
                 } catch (IOException e) {
@@ -137,6 +154,16 @@ public class OSMFragment extends Fragment {
         mapView.getOverlays().add(startMarker);
 
         this.mapController.setCenter(geoPoint);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getLatKnownLocation() {
+        this.fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                // setMarkerAndCenter(new GeoPoint(location.getLatitude(), location.getLongitude()));
+            }
+        });
     }
 
 }
