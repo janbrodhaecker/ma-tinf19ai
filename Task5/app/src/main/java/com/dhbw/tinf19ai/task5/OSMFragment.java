@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -86,8 +87,8 @@ public class OSMFragment extends Fragment {
         setMarkerAndCenter(MANNHEIM_GEO_POINT);
 
         if (getArguments() != null) {
-            String location = getArguments().getString("result");
-            searchAndCenterAddress(location);
+            //String location = getArguments().getString("result");
+            //searchAndCenterAddress(location);
         }
         getLatKnownLocation();
         return view;
@@ -158,10 +159,14 @@ public class OSMFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void getLatKnownLocation() {
+
+
+
+
         this.fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                // setMarkerAndCenter(new GeoPoint(location.getLatitude(), location.getLongitude()));
+                setMarkerAndCenter(new GeoPoint(location.getLatitude(), location.getLongitude()));
             }
         });
     }
