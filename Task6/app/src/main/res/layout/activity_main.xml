@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <import type="android.view.View"></import>
+        <variable name="dataModel" type="com.dhbw.tinf19ai.task6.DataModel" />
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:gravity="center"
+            android:textColor="@{dataModel.level &lt; 50 ? @color/red : @color/green}"
+            android:text="@{dataModel.level + ``}">
+        </TextView>
+    </LinearLayout>
+</layout>
